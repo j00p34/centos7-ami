@@ -23,12 +23,12 @@ mount ${DEVICE}2 $ROOTFS
 ### Basic CentOS Install
 rpm --root=$ROOTFS --initdb
 rpm --root=$ROOTFS -ivh \
-  https://mirror.bytemark.co.uk/centos/7.4.1708/os/x86_64/Packages/centos-release-7-4.1708.el7.centos.x86_64.rpm
+  http://mirror.centos.org/centos-7/7.4.1708/os/x86_64/Packages/centos-release-7-4.1708.el7.centos.x86_64.rpm
 # Install necessary packages
 yum --installroot=$ROOTFS --nogpgcheck -y groupinstall core
 yum --installroot=$ROOTFS --nogpgcheck -y install openssh-server grub2 acpid deltarpm cloud-init cloud-utils-growpart gdisk
 # Remove unnecessary packages
-UNNECESSARY="NetworkManager firewalld linux-firmware ivtv-firmware iwl*firmware"
+UNNECESSARY="firewalld linux-firmware ivtv-firmware iwl*firmware"
 yum --installroot=$ROOTFS -C -y remove $UNNECESSARY --setopt="clean_requirements_on_remove=1"
 
 # Create homedir for root
@@ -124,15 +124,10 @@ cloud_config_modules:
  - yum-add-repo
  - package-update-upgrade-install
  - timezone
- - puppet
- - chef
- - salt-minion
- - mcollective
  - disable-ec2-metadata
  - runcmd
 
 cloud_final_modules:
- - rightscale_userdata
  - scripts-per-once
  - scripts-per-boot
  - scripts-per-instance
@@ -166,8 +161,6 @@ datasource_list: [ Ec2, None ]
 # vim:syntax=yaml
 END
 
-#Disable SELinux
-sed -i -e 's/^\(SELINUX=\).*/\1disabled/' ${ROOTFS}/etc/selinux/config
 # Clean up
 yum --installroot=$ROOTFS clean all
 truncate -c -s 0 ${ROOTFS}/var/log/yum.log
